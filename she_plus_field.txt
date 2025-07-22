@@ -1,0 +1,34 @@
+.include 'mtj_sbckt_she_a.txt'
+.include 'mosistsmc180.sp'
+
+
+.param VSTT = '0V' 
+.param VSHM = '1V' 
+.param tshm = '350p'
+
+
+V1 0 1 PULSE (0 VSTT 1.5n 500p 500p 10n 10n)   
+V2 0 3 PULSE (0 VSHM 1.5n 500p 500p tshm 10n)
+Vg 2 0 0
+
+Xmtj 1 2 3 MTJ lx='45n' ly='45n' lz='0.7n' Ms0='1185' P0='0.73' alpha='0.02' Tmp0='300' RA0='10' lxshm ='60n' lyshm='45n' lzshm='5n' Ku='621600' UI='0' InA='3.14' H_app='400'
+
+*.tran 10p 4n 10f 10p UIC 
+
+
+.control
+run   
+
+set color0=white 
+set color1=black
+set color3=red
+set color3=blue
+set xbrushwidth=1
+
+tran 10p 4n 10f 10p UIC 
+plot v(xmtj.res)
+plot v(1) v(3)+2
+plot v(xmtj.mx) v(xmtj.my) v(xmtj.mz)
+
+.endc
+.end

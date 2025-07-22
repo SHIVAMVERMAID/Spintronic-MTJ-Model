@@ -1,0 +1,131 @@
+** Title:  mtj_sbckt_she_a.txt
+** Author: jagadish iit(bhu),varanasi
+** Email:  jagadishstudent.rs.ece19@itbhu.ac.in
+************************************************************************************
+.subckt MTJ e1 e2 e3 lx='45n' ly='45n' lz='0.7n' Ms0='Ms0' P0='0.73' alpha='0.02' Tmp0='300' RA0='5' lxshm ='60n' lyshm='45n' lzshm='5n' Ku='ku' UI='1' InA='0.02' H_app='400'
+
+.include 'LLG_CI_New.txt'
+.include 'Resistor.inc'
+.include 'HeatDF.inc'
+.include 'she.txt'
+
+.option post
+.option seed=5
+
+************* LLG parameters ******************
+.param pi='acos(-1)'
+************** unit = m ********************
+.param lx='45n'
+************** unit = m *********************
+.param ly='45n'
+************** unit = m *********************
+.param lz='0.7n'
+*************************** unit=cc *********
+.param Vol='lx*ly*lz*1e6' 
+*************************** unit=emu/cc *****
+.param Ms0='1185'  
+************************** unit=erg/cc ******
+.param ku='621600'
+************************** unit=seconds *****
+.param timestep='1p'
+************************** in CGS ***********
+.param Hk='2*Ku/Ms0' 
+.param Tmp0='300'
+*********************************************
+.param kbt='2*(1.38e-16)*Tmp0'
+*********************************************
+.param alpha='0.02'
+.param tc='1.50n'
+.param Ndz='0.94'
+*********************************************
+.param alt='(alpha/(1+(alpha*alpha)))'
+*************unit=Oe(-1)*sec^(-1)************
+.param gamma='1.76*1e7'
+*********************************************
+.param gmt='gamma*1*Ms0*Vol*timestep'
+
+***********Demagnization Field in CGS********
+.param hp='4*pi*Ms0/Hk*(tc/lz-Ndz)'   
+
+******************* Thermal Noise ***********
+.param thermalNoise='sqrt((alt)*(kbt/gmt))'
+
+*********************** Noise Suppress is used to scale down other noise sources in circuit********
+*********************** This factor does NOT affect the Thermal Magnetic Noise*********************
+.param noiseSupress='1e-5'
+
+************************************************ LLG Sub Ckt ****************************************************************************
+XLLG1 theta phi mx my mz isx isy isz ishex ishey ishez Ias hthx hthy hthz Tmp llg_solver hp='hp' alpha='alpha' Hk='Hk' Vol='Vol' Ms0='Ms0' H_app='400'
+************************************************ Resistor Sub Ckt ***********************************************************************
+XRA ex e2 res isz Tmp theta phi RA lx='lx' ly='ly' P0='P0' RA0='RA0' 
+************************************************ Heat Diffusion *************************************************************************
+XHD ihd Tmp HD lx='lx' ly='ly' lz='lz' Tmp0='Tmp0'
+************************************************ SHE ************************************************************************************
+XSHE ex2 e2 ishex ishey ishez rshe she lxshm='60n' lyshm='45n' lzshm='5n' lamda='1.5n'
+
+************************************** Internal top electrode of MTJ ***************************
+Ve1 e1 ex 0
+
+************************************** Internal top electrode of SHM ***************************
+Ve2 e3 ex2 0
+
+************************************* Ishm is fed to LLG and Head_Diffusion models *************
+G_shm1 0 Ishey cur='-I(Ve2)'
+G_shm3 0 Isz cur='-I(Ve1)'
+
+************************************* LLG accepts theta / pi while Dipolar accepts Cartesian****
+V1 isx 0 0
+V2 isy 0 0 
+V3 ishex 0 0
+V4 ishez 0 0
+
+
+************************************************************************************************
+G_Imtj2 0 ihd cur='-I(Ve1)'
+
+*** Asymetry of write current ************************
+*** positive bias:Ias=Iatp, negative bias:Ias=Ipta ***
+*** Iatp will generate more spin current. ************
+
+.param Iatp='1'
+.param Ipta='1/1.5'
+
+E_Ias Ias 0 vol='(1+(v(e1)-v(e2))/abs(v(e1)-v(e2)))*(Iatp-Ipta)/2+Ipta'
+
+**********************Random Noise Voltage (Gaussian distribution)******************************
+R1x hthx 0 'thermalNoise'
+I1x hthx 0 DC=0 TRNOISE(1 1p 0 0)
+
+R1y hthy 0 'thermalNoise'
+I1y hthy 0 DC=0 TRNOISE(1 1p 0 0)
+
+R1z hthz 0 'thermalNoise'
+I1z hthz 0 DC=0 TRNOISE(1 1p 0 0)
+
+
+.param k='1.38e-16'
+.param Kp='1.2e7'
+
+.param Tcurie='1420'
+.param beta='0.4'
+
+.param Msi='Ms0*(1-Tmp0/Tcurie)^beta'
+.param E='(Kp-0.5*Ndz*Msi*Msi)*vol'
+.param delta='E/(k*Tmp0)'
+.param theta ='asin((2*delta)^-0.5)*(1-UI)+UI*InA'
+
+*.control
+*setseed 54
+**option SEED=random
+*.endc
+
+************************intial set value for theta and phi***************************************
+.nodeset V(theta)='theta'
+.nodeset V(phi)='pi/2'
+
+*************************************************************************************************
+
+.ends
+
+
+

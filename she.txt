@@ -1,0 +1,23 @@
+** Title:  she.txt
+** Author: jagadish iit(bhu),varanasi
+** Email:  jagadishstudent.rs.ece19@itbhu.ac.in
+***************************************************************************************************
+.subckt she n_plus n_minus ishex ishey ishez rshe lxshm ='60n' lyshm= '45n' lzshm= '5n' lamda='1.5n'
+
+**********************Spin Hall Angle**************
+.param sha='0.3'  
+*************************************************** 
+.param lzshm='5n'
+**********************Spin diffusion length********
+.param lamda='1.5n'
+**********************Charge to spin conversion****
+.param ctos='sha*(1-(1/cosh(lzshm/lamda)))'
+***************************************************
+R_she n_plus n_minus '2000*lxshm/(lyshm*lzshm)*1n'
+E_rshe rshe 0 vol = '2000*lxshm/(lyshm*lzshm)*1n'
+******************************************************* Spin Current *****************
+E_ispin ishey 0 vol= '((v(n_plus)-v(n_minus))/((2000*lxshm/(lyshm*lzshm)*1n)))*ctos'
+**************************************************************************************
+.ends
+
+   

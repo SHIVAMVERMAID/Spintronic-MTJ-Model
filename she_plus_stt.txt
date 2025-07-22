@@ -1,0 +1,49 @@
+*******************she write netlist******************************
+.include 'mtj_sbckt_she_a.txt'
+.include 'mosistsmc180.sp'
+
+.param VSTT = '0.8V' 
+.param VSHM = '1.8V' 
+.param tshm = '500p'
+
+V1 0 1 PULSE (0 VSTT 1.5n 50p 50p 10n 10n)   
+V2 0 3 PULSE (0 VSHM 1.5n 50p 50p tshm 10n)
+Vg 2 0 0v
+
+xmtj 1 2 3 MTJ lx='45n' ly='45n' lz='0.7n' Ms0='1185' P0='0.73' alpha='0.02' Tmp0='300' RA0='10' lxshm ='60n' lyshm='45n' lzshm='5n' Ku='621600' UI='1' InA='0' H_app='0'
+
+
+.tran 10p 3n 10f 10p UIC
+
+.control
+run
+   
+option SEED=random
+set color0=white 
+set color1=black
+set color3=red
+set color3=blue
+set xbrushwidth=2
+*for VSHM 0 1.8V 0.45V
+**************parameter_sweep******
+*let start_she = 0v
+*let stop_she = 1.8v
+*let delta_she = 0.45v
+*let she_act = start_she
+**************loop*****************
+*while she_act le stop_she
+*alter VSHM=she_act
+*op
+*let she_act = she_act + delta_she
+**********transient***************
+*tran 10p 3n 10f 10p UIC
+*end
+
+**************plot*****************
+*plot v(xmtj.res)
+*plot v(1) v(3)+2
+plot v(xmtj.mx) v(xmtj.my) v(xmtj.mz)
+***********************************
+.endc
+.end
+
