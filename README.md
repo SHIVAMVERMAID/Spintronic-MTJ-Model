@@ -1,1 +1,1 @@
-# Spintronic-MTJ-Model
+# SHE MTJ Model and Circuit
